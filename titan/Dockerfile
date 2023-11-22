@@ -53,7 +53,7 @@ RUN . /opt/ros/noetic/setup.sh && mkdir -p /root/catkin_ws/src && cd /root/catki
 
 ## Install ROS dependencies for OpenCV
 RUN apt install ros-noetic-costmap-2d ros-noetic-gtsam ros-noetic-octomap-msgs
-RUN apt install ros-noetic-vision-msgs ros-noetic-mavros-msgs
+RUN apt install ros-noetic-vision-msgs ros-noetic-mavros-msgs ros-noetic-mavros
 
 RUN apt install iputils-ping default-jre iproute2 tmux
 RUN pip3 install torch zmq rospkg defusedxml utm
@@ -61,10 +61,15 @@ RUN pip3 install torch zmq rospkg defusedxml utm
 # Checkout latest tag with reference to ouster_ros
 RUN cd /root/catkin_ws/src/ && git clone https://github.com/ouster-lidar/ouster_example.git && cd ouster_example && git checkout 20220107
 RUN cd /root/catkin_ws/src/ && git clone --recursive https://github.com/KumarRobotics/spomp-system.git
+RUN cd /root/catkin_ws/src/ && git clone https://github.com/KumarRobotics/titan_master.git
+
 
 # Latest 3 commits point to a non-existent tag in ouster decoder so revert?
 RUN cd /root/catkin_ws/src/spomp-system/dependencies/ouster_decoder/ && git checkout 04eae71
 RUN cd /root/catkin_ws && . /opt/ros/noetic/setup.sh && catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release && catkin b -j8
+
+# Install geographiclib_datasets required by mavros
+RUN cd /root/catkin_ws && . devel/setup.sh && rosrun mavros install_geographiclib_datasets.sh
 
 # Copy the required files for MOCHA rajant interface
 run mkdir  /root/catkin_ws/src/spomp-system/MOCHA/interface_rajant/scripts/thirdParty/watchstate
